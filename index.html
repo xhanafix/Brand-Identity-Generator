@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Identity Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .prose h1 {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            margin-top: 1.5rem; /* mt-6 */
+            margin-bottom: 1rem; /* mb-4 */
+            color: #2563eb; /* text-blue-600 */
+        }
+        .prose h2 {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 600; /* font-semibold */
+            margin-top: 1.25rem; /* mt-5 */
+            margin-bottom: 0.75rem; /* mb-3 */
+            color: #3b82f6; /* text-blue-500 */
+        }
+        .prose h3 {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            margin-top: 1rem; /* mt-4 */
+            margin-bottom: 0.5rem; /* mb-2 */
+            color: #60a5fa; /* text-blue-400 */
+        }
+        .prose strong {
+            font-weight: 700; /* font-bold */
+        }
+        .prose em {
+            font-style: italic;
+        }
+        .prose ul, .prose ol {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .prose ul li, .prose ol li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        .prose ul li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #2563eb;
+        }
+        .prose ol li::before {
+            content: counter(list-item) '.';
+            counter-increment: list-item;
+            position: absolute;
+            left: 0;
+            color: #2563eb;
+            font-weight: 500;
+        }
+        .prose p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-extrabold text-center mb-10 text-gray-800 tracking-tight">Brand Identity Generator</h1>
+        
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Input Section -->
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h2 class="text-2xl font-semibold mb-6 text-gray-700">Input Produk</h2>
+                    
+                    <!-- Product Name -->
+                    <div class="mb-5">
+                        <label for="productName" class="block text-sm font-medium text-gray-700 mb-2">Nama Produk</label>
+                        <input type="text" id="productName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm" placeholder="Contoh: EcoClean Deterjen">
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="mb-6">
+                        <label for="productDetails" class="block text-sm font-medium text-gray-700 mb-2">Butiran Produk (fungsi, manfaat, sasaran audiens, keunikan)</label>
+                        <textarea id="productDetails" rows="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm" placeholder="Contoh: Deterjen ramah lingkungan, membersihkan noda membandel, aman untuk kulit sensitif, untuk keluarga modern yang peduli lingkungan."></textarea>
+                    </div>
+
+                    <!-- AI Model Selection -->
+                    <div class="mb-5">
+                        <label for="aiModel" class="block text-sm font-medium text-gray-700 mb-2">Model AI</label>
+                        <select id="aiModel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm">
+                            <optgroup label="OpenRouter">
+                                <option value="mistralai/mixtral-8x7b">Mistral Mixtral 8x7B</option>
+                                <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                <option value="meta-llama/llama-3-70b-instruct">Llama 3 70B</option>
+                                <option value="openrouter/custom">Model Tersuai OpenRouter</option>
+                            </optgroup>
+                            <optgroup label="Google">
+                                <option value="google/gemini-pro" selected>Gemini Pro</option>
+                                <option value="google/gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                <option value="google/custom">Gemini Model Tersuai</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Custom Model Input (hidden by default) -->
+                    <div id="customModelContainer" class="mb-5 hidden">
+                        <label for="customModel" class="block text-sm font-medium text-gray-700 mb-2">Nama Model Tersuai</label>
+                        <input type="text" id="customModel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm" placeholder="Contoh: anthropic/claude-3-opus">
+                        <p id="customModelHint" class="text-xs text-gray-500 mt-1"></p>
+                    </div>
+
+                    <!-- API Key -->
+                    <div class="mb-6">
+                        <label for="apiKey" class="block text-sm font-medium text-gray-700 mb-2">API Key (OpenRouter/Google)</label>
+                        <input type="password" id="apiKey" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm" placeholder="Masukkan API Key anda">
+                    </div>
+
+                    <!-- Save API Key Button -->
+                    <button id="saveApiKey" class="w-full bg-gray-600 text-white py-3 px-6 rounded-xl hover:bg-gray-700 transition-colors duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 shadow-md">
+                        Simpan API Key & Model
+                    </button>
+                    
+                    <!-- Generate Button -->
+                    <button id="generateBtn" class="w-full mt-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 shadow-md">
+                        Jana Identiti Jenama
+                    </button>
+
+                    <!-- Reset Button -->
+                    <button id="resetBtn" class="w-full mt-3 bg-gray-300 text-gray-800 py-3 px-6 rounded-xl hover:bg-gray-400 transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 shadow-sm">
+                        Reset Input
+                    </button>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-700">Identiti Jenama Anda</h2>
+                        <div class="space-x-2">
+                            <button id="copyBtn" class="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors duration-200 shadow-sm">
+                                <i class="fas fa-copy mr-1"></i> Salin
+                            </button>
+                            <button id="exportBtn" class="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors duration-200 shadow-sm">
+                                <i class="fas fa-download mr-1"></i> Export TXT
+                            </button>
+                            <button id="pdfBtn" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200 shadow-sm">
+                                <i class="fas fa-file-pdf mr-1"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" class="hidden flex justify-center items-center py-12">
+                        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+                        <p class="ml-4 text-gray-600 text-lg">Menjana identiti jenama...</p>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div id="progressContainer" class="hidden mt-4">
+                        <div class="flex justify-between mb-2">
+                            <span id="progressText" class="text-sm text-gray-600">Menjana...</span>
+                            <span id="progressPercentage" class="text-sm text-gray-600">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Output Content -->
+                    <div id="outputContent" class="prose max-w-none text-gray-800 leading-relaxed">
+                        <div class="text-gray-500 text-center py-12 text-lg">
+                            Identiti jenama akan dipaparkan di sini...
+                        </div>
+                    </div>
+
+                    <!-- Message Box -->
+                    <div id="messageBox" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+                            <p id="messageText" class="text-gray-700 mb-4"></p>
+                            <button id="messageBoxClose" class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Global variables for Firebase (if needed, but not used in this app for persistence)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // DOM Elements
+        const productNameInput = document.getElementById('productName');
+        const productDetailsTextarea = document.getElementById('productDetails');
+        const aiModelSelect = document.getElementById('aiModel');
+        const customModelContainer = document.getElementById('customModelContainer');
+        const customModelInput = document.getElementById('customModel');
+        const customModelHint = document.getElementById('customModelHint');
+        const apiKeyInput = document.getElementById('apiKey');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const generateBtn = document.getElementById('generateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const pdfBtn = document.getElementById('pdfBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const outputContent = document.getElementById('outputContent');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageBoxClose = document.getElementById('messageBoxClose');
+        const progressContainer = document.getElementById('progressContainer'); // New
+        const progressBar = document.getElementById('progressBar'); // New
+        const progressText = document.getElementById('progressText'); // New
+        const progressPercentage = document.getElementById('progressPercentage'); // New
+
+        // Function to show custom message box
+        function showMessageBox(message) {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+        }
+
+        // Close message box
+        messageBoxClose.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+
+        // Show/hide custom model input based on selection
+        aiModelSelect.addEventListener('change', () => {
+            const selectedValue = aiModelSelect.value;
+            
+            if (selectedValue.includes('custom')) {
+                customModelContainer.classList.remove('hidden');
+                // Set hint based on provider
+                if (selectedValue === 'openrouter/custom') {
+                    customModelHint.textContent = 'Masukkan nama model OpenRouter tersuai (contoh: anthropic/claude-3-opus)';
+                } else if (selectedValue === 'google/custom') {
+                    customModelHint.textContent = 'Masukkan nama model Gemini tersuai (contoh: gemini-1.5-pro)';
+                }
+            } else {
+                customModelContainer.classList.add('hidden');
+                customModelInput.value = ''; // Clear custom model if not selected
+            }
+        });
+
+        // Load saved API key and model on page load
+        window.addEventListener('load', () => {
+            const savedApiKey = localStorage.getItem('brand_generator_api_key');
+            const savedModel = localStorage.getItem('brand_generator_ai_model');
+            const savedCustomModel = localStorage.getItem('brand_generator_custom_model_name');
+            
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+            }
+            
+            if (savedModel) {
+                aiModelSelect.value = savedModel;
+                if (savedModel.includes('custom')) {
+                    customModelContainer.classList.remove('hidden');
+                    if (savedCustomModel) {
+                        customModelInput.value = savedCustomModel;
+                        // Trigger change event to set hint text correctly
+                        aiModelSelect.dispatchEvent(new Event('change')); 
+                    }
+                }
+            }
+        });
+
+        // Save API key and model
+        saveApiKeyBtn.addEventListener('click', () => {
+            const apiKey = apiKeyInput.value.trim();
+            const model = aiModelSelect.value;
+            
+            if (!apiKey) {
+                showMessageBox('Sila masukkan API Key.');
+                return;
+            }
+
+            localStorage.setItem('brand_generator_api_key', apiKey);
+            localStorage.setItem('brand_generator_ai_model', model);
+            
+            if (model.includes('custom')) {
+                const customModel = customModelInput.value.trim();
+                if (!customModel) {
+                    showMessageBox('Sila masukkan nama model tersuai.');
+                    return;
+                }
+                localStorage.setItem('brand_generator_custom_model_name', customModel);
+            }
+
+            showMessageBox('API Key dan model berjaya disimpan!');
+        });
+
+        // Helper function to format content
+        function formatContent(content) {
+            return content
+                .replace(/```markdown\n?/g, '') // Remove markdown code block start
+                .replace(/```\n?/g, '') // Remove markdown code block end
+                .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mt-6 mb-4 text-blue-600">$1</h1>')
+                .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold mt-5 mb-3 text-blue-500">$1</h2>')
+                .replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold mt-4 mb-2 text-blue-400">$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+                .replace(/^- (.*$)/gm, '<li class="ml-4 mb-2">• $1</li>')
+                .replace(/\n/g, '<br>'); // Convert newlines to <br> for basic paragraph breaks
+        }
+
+        // Generate brand identity
+        generateBtn.addEventListener('click', async () => {
+            const apiKey = apiKeyInput.value.trim(); // Get API key from input
+            const productName = productNameInput.value.trim();
+            const productDetails = productDetailsTextarea.value.trim();
+            let selectedModel = aiModelSelect.value;
+
+            if (!apiKey) {
+                showMessageBox('Sila simpan API Key terlebih dahulu.');
+                return;
+            }
+            
+            if (!productName || !productDetails) {
+                showMessageBox('Sila lengkapkan semua medan input (Nama Produk dan Butiran Produk).');
+                return;
+            }
+
+            // Determine the actual model name if a custom option is selected
+            if (selectedModel.includes('custom')) {
+                const customModelName = customModelInput.value.trim();
+                if (!customModelName) {
+                    showMessageBox('Sila masukkan nama model tersuai.');
+                    return;
+                }
+                if (selectedModel === 'openrouter/custom') {
+                    selectedModel = customModelName; // For OpenRouter, custom name is the model
+                } else if (selectedModel === 'google/custom') {
+                    selectedModel = `google/${customModelName}`; // For Google, prefix with 'google/'
+                }
+            }
+
+            // Show loading spinner and progress bar
+            loadingSpinner.classList.remove('hidden');
+            progressContainer.classList.remove('hidden');
+            outputContent.innerHTML = ''; // Clear previous output
+            progressBar.style.width = '0%';
+            progressPercentage.textContent = '0%';
+
+            try {
+                const brandSections = [
+                    { 
+                        name: 'Visi Kami',
+                        prompt: (productName, productDetails) => `Jana kenyataan visi yang ringkas, aspiratif, dan berpandangan jauh untuk produk bernama "${productName}" dengan butiran berikut: ${productDetails}. Jelaskan matlamat jangka panjang yang ingin dicapai oleh jenama.`
+                    },
+                    { 
+                        name: 'Misi Kami',
+                        prompt: (productName, productDetails) => `Jana kenyataan misi yang jelas, ringkas, dan menerangkan tujuan asas jenama untuk produk bernama "${productName}" dengan butiran berikut: ${productDetails}. Jelaskan apa yang jenama lakukan, untuk siapa, dan bagaimana ia melakukannya.`
+                    },
+                    { 
+                        name: 'Nilai Teras Kami',
+                        prompt: (productName, productDetails) => `Jana 3-4 nilai teras yang relevan untuk produk bernama "${productName}" dengan butiran berikut: ${productDetails}. Jelaskan prinsip panduan yang membentuk budaya dan operasi jenama. Format setiap nilai sebagai senarai bullet points.`
+                    },
+                    { 
+                        name: 'Mengapa Kami Melakukan Ini (Our Purpose)',
+                        prompt: (productName, productDetails) => `Jana penjelasan yang ringkas dan bersemangat tentang sebab di sebalik kewujudan jenama untuk produk bernama "${productName}" dengan butiran berikut: ${productDetails}, di luar keuntungan. Apakah impak yang ingin dihasilkan oleh jenama di dunia atau dalam kehidupan pelanggannya?`
+                    }
+                ];
+
+                let currentProgress = 0;
+                const totalSections = brandSections.length;
+                let fullBrandIdentity = '';
+
+                for (let i = 0; i < totalSections; i++) {
+                    const section = brandSections[i];
+                    progressText.textContent = `Menjana: ${section.name}...`;
+
+                    const sectionPrompt = section.prompt(productName, productDetails);
+
+                    let apiEndpoint;
+                    let headers;
+                    let requestBody;
+
+                    if (selectedModel.startsWith('google/')) {
+                        const geminiModel = selectedModel.replace('google/', '');
+                        apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+                        headers = { 'Content-Type': 'application/json' };
+                        requestBody = {
+                            contents: [{
+                                parts: [{
+                                    text: sectionPrompt
+                                }]
+                            }]
+                        };
+                    } else { // Assume OpenRouter
+                        apiEndpoint = 'https://openrouter.ai/api/v1/chat/completions';
+                        headers = {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json',
+                            'HTTP-Referer': window.location.origin,
+                            'X-Title': 'Brand Identity Generator'
+                        };
+                        requestBody = {
+                            model: selectedModel,
+                            messages: [
+                                {
+                                    role: 'system',
+                                    content: 'Anda adalah pakar dalam menjana identiti jenama yang komprehensif dan resonan.'
+                                },
+                                {
+                                    role: 'user',
+                                    content: sectionPrompt
+                                }
+                            ]
+                        };
+                    }
+                    
+                    const response = await fetch(apiEndpoint, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error.message || data.error.details || 'Unknown API error occurred');
+                    }
+
+                    let generatedContent;
+                    if (selectedModel.startsWith('google/')) {
+                        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+                            generatedContent = data.candidates[0].content.parts[0].text;
+                        } else {
+                            throw new Error('Invalid response format from Google API');
+                        }
+                    } else { // OpenRouter
+                        if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+                            generatedContent = data.choices[0].message.content;
+                        } else {
+                             throw new Error('Invalid response format from OpenRouter API');
+                        }
+                    }
+
+                    // Append the generated section with its title
+                    fullBrandIdentity += `\n# ${section.name}\n` + generatedContent + '\n';
+                    outputContent.innerHTML = formatContent(fullBrandIdentity);
+
+                    // Update progress bar
+                    currentProgress = (i + 1) / totalSections * 100;
+                    progressBar.style.width = `${currentProgress}%`;
+                    progressPercentage.textContent = `${Math.round(currentProgress)}%`;
+                }
+
+                progressText.textContent = 'Identiti jenama siap dijana!';
+
+            } catch (error) {
+                console.error('Error generating brand identity:', error);
+                showMessageBox(`Ralat semasa menjana identiti jenama: ${error.message}. Sila pastikan API Key dan input anda betul.`);
+                progressText.textContent = 'Ralat semasa menjana identiti jenama';
+            } finally {
+                loadingSpinner.classList.add('hidden');
+                // Keep progress bar visible at 100% after completion, or hide it if preferred
+            }
+        });
+
+        // Reset input
+        resetBtn.addEventListener('click', () => {
+            productNameInput.value = '';
+            productDetailsTextarea.value = '';
+            outputContent.innerHTML = '<div class="text-gray-500 text-center py-12 text-lg">Identiti jenama akan dipaparkan di sini...</div>';
+            aiModelSelect.value = 'google/gemini-pro'; // Reset to default
+            customModelContainer.classList.add('hidden');
+            customModelInput.value = '';
+            progressContainer.classList.add('hidden'); // Hide progress bar on reset
+            progressBar.style.width = '0%';
+            progressPercentage.textContent = '0%';
+            progressText.textContent = 'Menjana...';
+            // Don't clear API key as it's saved in local storage
+        });
+
+        // Copy to clipboard
+        copyBtn.addEventListener('click', () => {
+            const text = outputContent.innerText;
+            // Use execCommand for broader compatibility within iframes
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = text;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                showMessageBox('Identiti jenama berjaya disalin!');
+            } catch (err) {
+                showMessageBox('Gagal menyalin: ' + err);
+            }
+            document.body.removeChild(tempTextArea);
+        });
+
+        // Export to text file
+        exportBtn.addEventListener('click', () => {
+            const text = outputContent.innerText;
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'brand-identity.txt';
+            document.body.appendChild(a); // Required for Firefox
+            a.click();
+            document.body.removeChild(a); // Clean up
+            window.URL.revokeObjectURL(url);
+        });
+
+        // Export to PDF
+        pdfBtn.addEventListener('click', () => {
+            // Create a temporary container for PDF content
+            const pdfContainer = document.createElement('div');
+            pdfContainer.className = 'p-8 font-inter'; // Added font-inter for consistency
+            
+            // Add title
+            const title = document.createElement('h1');
+            title.className = 'text-3xl font-bold mb-8 text-center text-gray-800';
+            title.textContent = 'Laporan Identiti Jenama';
+            pdfContainer.appendChild(title);
+
+            // Add product info
+            const productInfo = document.createElement('div');
+            productInfo.className = 'mb-8 p-5 bg-gray-50 rounded-lg border border-gray-200';
+            productInfo.innerHTML = `
+                <h2 class="text-xl font-semibold mb-3 text-gray-700">Maklumat Produk</h2>
+                <p class="mb-2"><strong>Nama Produk:</strong> ${productNameInput.value}</p>
+                <p><strong>Butiran Produk:</strong> ${productDetailsTextarea.value}</p>
+            `;
+            pdfContainer.appendChild(productInfo);
+
+            // Clone the generated brand identity content
+            const brandContent = outputContent.cloneNode(true);
+            // Re-apply prose-like styling for PDF generation if needed, ensure consistent class names
+            brandContent.className = 'prose max-w-none text-gray-800'; 
+            pdfContainer.appendChild(brandContent);
+
+            // Add footer
+            const footer = document.createElement('div');
+            footer.className = 'mt-10 text-center text-sm text-gray-500';
+            footer.textContent = `Dijanakan pada: ${new Date().toLocaleString('ms-MY')}`;
+            pdfContainer.appendChild(footer);
+
+            // Configure PDF options
+            const opt = {
+                margin: 1,
+                filename: 'brand-identity.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, logging: false }, // logging false to avoid console spam
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Generate PDF
+            html2pdf().set(opt).from(pdfContainer).save();
+        });
+    </script>
+</body>
+</html>
